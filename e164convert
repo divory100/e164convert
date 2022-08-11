@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+"""
+e164convert
+
+Converts valid UK phone numbers to E.164 international standard
+
+Usage: e164convert <phone number>
+"""
+
+from sys import argv, exit
+
+VALID_PREFIXES = ["0", "+44", "+044"]
+VALID_SERVICES = ["1","2","3","5","7","8","9"]
+
+def clean(user_input: str) -> str:
+    """Removes unwanted dashes and spaces from the user input"""
+    return user_input.replace("-", "").replace(" ", "")
+
+def is_uk_valid(phone_number: str) -> bool:
+    """Checks if a phone number is a valid United Kingdom number"""
+    def checks(p, prefix):
+        return (
+            p.startswith(prefix) and \
+            len(p.partition(prefix)[2]) == 10 and \
+            p.partition(prefix)[2][0] in VALID_SERVICES
+        )
+
+    for prefix in VALID_PREFIXES:
+        if checks(phone_number, prefix):
+            return True
+
+    return False
+
+
+def get_e164(phone_number: str) -> str:
+    """Converts a UK phone number to the E.164 international standard format"""
+    return f"+44{phone_number[-10:]}"
+
+def main():
+    try:
+        user_input = argv[1]
+    except IndexError:
+        print("e164convert\nUsage: \033[;34me164convert <phone number>\033[0m")
+        exit(1)
+
+    #1. remove unwanted chars
+    phone_number = clean(user_input)
+
+    #2. check validity
+    if is_uk_valid(phone_number):
+        print(f"\033[;32mSuccess!\033[0m {user_input} is a valid UK phone number.")
+        #3. get E.164
+        print(f"In E.164 format, this number is: \033[1;34m{get_e164(phone_number)}\033[0m")
+    else:
+        print(f"\033[;31mError\033[0m: {user_input} is not a valid UK phone number.")
+        exit(1)
+
+    
+
+if __name__ == "__main__":
+    main()
+
