@@ -36,6 +36,13 @@ def get_e164(phone_number: str) -> str:
     """Converts a UK phone number to the E.164 international standard format"""
     return f"+44{phone_number[-10:]}"
 
+def diagnose_country(phone_number: str):
+    """
+    Determines if and which country a non-UK phone number is from
+    Returns either None or a string (country)
+    """
+    pass
+
 def main():
     try:
         user_input = argv[1]
@@ -53,6 +60,12 @@ def main():
         print(f"In E.164 format, this number is: \033[1;34m{get_e164(phone_number)}\033[0m")
     else:
         print(f"\033[;31mError\033[0m: {user_input} is not a valid UK phone number.")
+
+        country = diagnose_country(phone_number)
+        if country:
+            print(f"This phone number is from {diagnose_country(phone_number)}.")
+        else:
+            print(f"This phone number is also not valid for any other countries.")
         exit(1)
 
     
