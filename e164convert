@@ -6,11 +6,8 @@ Converts valid UK phone numbers to E.164 international standard
 
 Usage: e164convert <phone number>
 """
-
+import re
 from sys import argv, exit
-
-VALID_PREFIXES = ["0", "+44", "+044"]
-VALID_SERVICES = ["1","2","3","5","7","8","9"]
 
 def clean(user_input: str) -> str:
     """Removes unwanted dashes and spaces from the user input"""
@@ -18,18 +15,8 @@ def clean(user_input: str) -> str:
 
 def is_uk_valid(phone_number: str) -> bool:
     """Checks if a phone number is a valid United Kingdom number"""
-    def checks(p, prefix):
-        return (
-            p.startswith(prefix) and \
-            len(p.partition(prefix)[2]) == 10 and \
-            p.partition(prefix)[2][0] in VALID_SERVICES
-        )
-
-    for prefix in VALID_PREFIXES:
-        if checks(phone_number, prefix):
-            return True
-
-    return False
+    #                 |prefix @ start|service|end:9digits|
+    return re.match(r"^(\+44|\+044|0)[1235789][0-9]{9}$", phone_number) is not None
 
 
 def get_e164(phone_number: str) -> str:
@@ -65,7 +52,8 @@ def main():
         if country:
             print(f"This phone number is from {diagnose_country(phone_number)}.")
         else:
-            print(f"This phone number is also not valid for any other countries.")
+            pass
+            #print(f"This phone number is also not valid for any other countries.")
         exit(1)
 
     

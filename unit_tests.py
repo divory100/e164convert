@@ -14,7 +14,6 @@ def load_cases(filename: str) -> list:
         with open(f"testcases/{filename}.json", "r") as f:
             return json.load(f)
     except FileNotFoundError as e:
-        print(e)
         raise FileNotFoundError(f"Test case file '{filename}.json' not found under testcases/")
 
 class TestClean(unittest.TestCase):
