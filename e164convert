@@ -52,8 +52,7 @@ def main():
         if country:
             print(f"This phone number is from {diagnose_country(phone_number)}.")
         else:
-            pass
-            #print(f"This phone number is also not valid for any other countries.")
+            print(f"This phone number is also not valid for any other countries.")
         exit(1)
 
     
