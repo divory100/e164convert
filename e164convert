@@ -9,6 +9,8 @@ Usage: e164convert <phone number>
 import re
 from sys import argv, exit
 
+from area_codes import get_codes
+
 def clean(user_input: str) -> str:
     """Removes unwanted dashes and spaces from the user input"""
     return user_input.replace("-", "").replace(" ", "")
@@ -16,7 +18,7 @@ def clean(user_input: str) -> str:
 def is_uk_valid(phone_number: str) -> bool:
     """Checks if a phone number is a valid United Kingdom number"""
     #                 |prefix @ start|service|end:9digits|
-    return re.match(r"^(\+44|\+044|0)[1235789][0-9]{9}$", phone_number) is not None
+    return re.match(r"^(\+44|\+044|0)[1235789]\d{9}$", phone_number) is not None
 
 
 def get_e164(phone_number: str) -> str:
@@ -28,7 +30,28 @@ def diagnose_country(phone_number: str):
     Determines if and which country a non-UK phone number is from
     Returns either None or a string (country)
     """
-    pass
+    codes = get_codes()
+
+    shortlist = []
+    for code in codes:
+        if phone_number.startswith(code) and non_uk_checks(phone_number):
+            shortlist.append(code)
+    
+    if len(shortlist) > 0:
+        shortlist = sorted(shortlist, key=len, reverse=True)
+        return codes[shortlist[0]]
+    else:
+        return False
+
+def non_uk_checks(phone_number: str) -> bool:
+    """Basic checks for if a non-uk number is valid"""
+    p = phone_number.strip("+")
+
+    try:
+        ip = int(p)
+        return len(p) <= 15
+    except ValueError:
+        return False
 
 def main():
     try:
@@ -46,11 +69,12 @@ def main():
         #3. get E.164
         print(f"In E.164 format, this number is: \033[1;34m{get_e164(phone_number)}\033[0m")
     else:
-        print(f"\033[;31mError\033[0m: {user_input} is not a valid UK phone number.")
+        print(f"\033[;31m{user_input}\033[0m is not a valid UK phone number.")
 
         country = diagnose_country(phone_number)
-        if country:
-            print(f"This phone number is from {diagnose_country(phone_number)}.")
+        if country and not phone_number.startswith("+44"):
+            print(f"However, this phone number may be a valid number from \033[;35m{diagnose_country(phone_number)}\033[0m.\n" \
+                  f"In E.164 format it would be \033[1;34m{phone_number}\033[0m")
         else:
             print(f"This phone number is also not valid for any other countries.")
         exit(1)
